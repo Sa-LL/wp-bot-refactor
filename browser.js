@@ -7,14 +7,14 @@ const isHeadless = true;
 const delay = 3000;
 // await new Promise((r) => setTimeout(r, 1000));
 
-const EXIT_TEXT = '!exit';
+const EXIT_TEXT = "!exit";
 
 const SS_PATH = "./screenshots/";
 
 const SS_OBJECT = {
   QR_CODE: "qr.png",
   DRAWER_LEFT: "drawer_left.png",
-  INPUT: 'input.png'
+  INPUT: "input.png",
 };
 
 /**
@@ -27,20 +27,20 @@ Object.keys(SS_OBJECT).forEach((key) => {
 });
 
 function getRandom(min, max) {
-  const floatRandom = Math.random()
+  const floatRandom = Math.random();
 
-  const difference = max - min
+  const difference = max - min;
 
   // random between 0 and the difference
-  const random = Math.round(difference * floatRandom)
+  const random = Math.round(difference * floatRandom);
 
-  const randomWithinRange = random + min
+  const randomWithinRange = random + min;
 
-  return randomWithinRange
+  return randomWithinRange;
 }
 
 const contactNameTemporal = "C&D: Cena navideña 🎅🏻";
-// const contactNameTemporal = "Audios";
+// const contactNameTemporal = "It's vicioing time 🌑🧛‍♂️🦇⚰️🧄";
 
 (async () => {
   const browser = await puppeteer.launch({ headless: isHeadless });
@@ -67,26 +67,34 @@ const contactNameTemporal = "C&D: Cena navideña 🎅🏻";
 
   await page.click(`span[title="${contactNameTemporal}"]`);
 
-  let lastMessageSpan = '';
+  let lastMessageSpan = "";
 
-  while(lastMessageSpan !== EXIT_TEXT) {
-
+  while (lastMessageSpan !== EXIT_TEXT) {
     await new Promise((r) => setTimeout(r, 1000));
-      
-    const messagesOnScreen = await page.$$(SELECTORS.MESSAGES);
-  
-    const lastMessage = messagesOnScreen.pop();
-  
-    lastMessageSpan = await lastMessage.$eval("span", element => element.textContent);
 
-    if (lastMessageSpan === '!d20') {
-      const D20 = getRandom(1, 20);
-      await page.type(SELECTORS.INPUT_MESSAGE, `D20: ${D20}`);
-      await page.click(SELECTORS.SEND_BUTTON);
+    await page.screenshot({ path: SS_PATH + SS_OBJECT.INPUT });
+
+    try {
+      const messagesOnScreen = await page.$$(SELECTORS.MESSAGES);
+  
+      const lastMessage = messagesOnScreen.pop();
+  
+      lastMessageSpan = await lastMessage.$eval(
+        "span",
+        (element) => element.textContent
+      );
+  
+      if (lastMessageSpan === "!d20") {
+        const D20 = getRandom(1, 20);
+        await page.type(SELECTORS.INPUT_MESSAGE, `El lorax dice: *${D20}*`);
+        await page.click(SELECTORS.SEND_BUTTON);
+      }
+    } catch (error) {
+      lastMessageSpan = '';
+      console.log(error);
     }
 
     console.log(`El último elemento span es: ${lastMessageSpan}`);
-
   }
 
   // const unreadElements = await page.$$(SELECTORS.UNREAD_CLASS);
